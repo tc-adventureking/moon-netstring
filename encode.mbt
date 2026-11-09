@@ -10,7 +10,10 @@ pub fn encode_to(output : @buffer.Buffer, payload : BytesView) -> Unit {
 ///|
 /// Encode one binary payload as decimal-length:payload,.
 pub fn encode(payload : BytesView) -> Bytes {
-  let output = @buffer.Buffer()
+  let size = encoded_length(payload.length().reinterpret_as_uint())
+  // A contiguous builder is Int-indexed even though size planning is Int64.
+  let hint = if size <= 2_147_483_647L { size.to_int() } else { 0 }
+  let output = @buffer.Buffer(size_hint=hint)
   encode_to(output, payload)
   output.to_bytes()
 }
