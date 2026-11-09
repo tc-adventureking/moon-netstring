@@ -1,8 +1,24 @@
 ///|
+fn write_header(output : @buffer.Buffer, payload_length : UInt32) -> Unit {
+  output.write_string_utf8(payload_length.to_string()[:])
+  output.write_byte(b':')
+}
+
+///|
+/// Encode only the decimal length and colon. Send this header, exactly
+/// payload_length payload bytes, then a comma to avoid copying a whole frame.
+/// This UInt-sized sender may declare more than the local Int-sized decoder
+/// accepts; respect the receiver's configured limit when interoperating.
+pub fn encode_header(payload_length : UInt32) -> Bytes {
+  let output = @buffer.Buffer(size_hint=11)
+  write_header(output, payload_length)
+  output.to_bytes()
+}
+
+///|
 /// Append one netstring. Length counts payload bytes, not text characters.
 pub fn encode_to(output : @buffer.Buffer, payload : BytesView) -> Unit {
-  output.write_string_utf8(payload.length().to_string()[:])
-  output.write_byte(b':')
+  write_header(output, payload.length().reinterpret_as_uint())
   output.write_bytes(payload)
   output.write_byte(b',')
 }

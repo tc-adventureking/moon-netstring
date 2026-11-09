@@ -15,6 +15,8 @@ pub fn encode(BytesView) -> Bytes
 
 pub fn encode_all(Array[BytesView]) -> Bytes
 
+pub fn encode_header(UInt32) -> Bytes
+
 pub fn encode_to(@buffer.Buffer, BytesView) -> Unit
 
 pub fn encoded_length(UInt32) -> Int64
