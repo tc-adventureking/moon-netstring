@@ -55,6 +55,7 @@ pub fn StreamingDecoder::new(
 
 ///|
 /// True when a partial frame has been consumed. Does not imply validity.
+/// Failed and finished parsers return false; use finish() to validate EOF.
 pub fn StreamingDecoder::pending(self : StreamingDecoder) -> Bool {
   match self.phase {
     Length => self.digits != 0

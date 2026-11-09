@@ -13,6 +13,7 @@ pub fn Decoder::new(max_len~ : Int32 = 99_999) -> Decoder raise NetstringError {
 }
 
 ///|
+/// True for a partial active frame. Use finish() to validate EOF.
 pub fn Decoder::pending(self : Decoder) -> Bool {
   self.parser.pending()
 }
