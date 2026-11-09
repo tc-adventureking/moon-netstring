@@ -1,0 +1,74 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "tc-adventureking/netstring"
+
+import {
+  "moonbitlang/core/buffer",
+  "moonbitlang/core/debug",
+}
+
+// Values
+pub fn decode(BytesView, max_len? : Int32) -> Array[BytesView] raise NetstringError
+
+pub fn encode(BytesView) -> Bytes
+
+pub fn encode_all(Array[BytesView]) -> Bytes
+
+pub fn encode_to(@buffer.Buffer, BytesView) -> Unit
+
+// Errors
+#derive(Eq, @debug.Debug)
+pub(all) suberror NetstringError {
+  NetstringError(ErrorKind, Int64)
+}
+pub fn NetstringError::equal(Self, Self) -> Bool
+pub fn NetstringError::kind(Self) -> ErrorKind
+pub fn NetstringError::not_equal(Self, Self) -> Bool
+pub fn NetstringError::offset(Self) -> Int64
+pub fn NetstringError::to_repr(Self) -> @debug.Repr
+
+// Types and methods
+type Decoder
+pub fn Decoder::feed(Self, BytesView, (BytesView) -> Unit) -> Unit raise NetstringError
+pub fn Decoder::finish(Self) -> Unit raise NetstringError
+pub fn Decoder::new(max_len? : Int32) -> Self raise NetstringError
+pub fn Decoder::offset(Self) -> Int64
+pub fn Decoder::pending(Self) -> Bool
+pub fn Decoder::reset(Self) -> Unit raise NetstringError
+
+#derive(Eq, @debug.Debug)
+pub(all) enum ErrorKind {
+  EmptyLength
+  LeadingZero
+  InvalidByte
+  TooLong
+  MissingComma
+  Truncated
+  Closed
+  InvalidLimit
+  Reentrant
+}
+pub fn ErrorKind::equal(Self, Self) -> Bool
+pub fn ErrorKind::not_equal(Self, Self) -> Bool
+pub fn ErrorKind::to_repr(Self) -> @debug.Repr
+
+#derive(Eq, @debug.Debug)
+pub(all) enum Event {
+  Begin(Int32)
+  Data(BytesView)
+  End
+}
+pub fn Event::equal(Self, Self) -> Bool
+pub fn Event::not_equal(Self, Self) -> Bool
+pub fn Event::to_repr(Self) -> @debug.Repr
+
+type StreamingDecoder
+pub fn StreamingDecoder::feed(Self, BytesView, (Event) -> Unit) -> Unit raise NetstringError
+pub fn StreamingDecoder::finish(Self) -> Unit raise NetstringError
+pub fn StreamingDecoder::new(max_len? : Int32) -> Self raise NetstringError
+pub fn StreamingDecoder::offset(Self) -> Int64
+pub fn StreamingDecoder::pending(Self) -> Bool
+pub fn StreamingDecoder::reset(Self) -> Unit raise NetstringError
+
+// Type aliases
+
+// Traits
