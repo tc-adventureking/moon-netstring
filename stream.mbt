@@ -79,9 +79,8 @@ fn StreamingDecoder::fail(
   raise error
 }
 
-///| Deliver nonempty zero-copy views of chunk data. Never call this parser's
-
 ///|
+/// Deliver nonempty zero-copy views of chunk data. Never call this parser's
 /// mutating methods from a callback. Such calls raise Reentrant without mutation.
 pub fn StreamingDecoder::feed(
   self : StreamingDecoder,
@@ -172,9 +171,8 @@ fn StreamingDecoder::feed_inner(
   }
 }
 
-///| At a frame boundary closes successfully, and is then idempotent. A partial
-
 ///|
+/// At a frame boundary closes successfully, and is then idempotent. A partial
 /// frame fails at EOF. Failed parsers keep their original error until reset.
 pub fn StreamingDecoder::finish(
   self : StreamingDecoder,

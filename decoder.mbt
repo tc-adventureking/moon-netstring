@@ -22,11 +22,9 @@ pub fn Decoder::offset(self : Decoder) -> Int64 {
   self.parser.offset()
 }
 
-///| Valid frames before an error are delivered before feed raises. Views backed
-
-///| by a single input chunk are returned without copying. Callbacks may retain
-
 ///|
+/// Valid frames before an error are delivered before feed raises. Views backed
+/// by a single input chunk are returned without copying. Callbacks may retain
 /// views, which also retain their backing Bytes. Reentrant mutation is rejected.
 pub fn Decoder::feed(
   self : Decoder,

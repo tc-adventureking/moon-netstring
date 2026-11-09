@@ -1,6 +1,5 @@
-///| Strictly decode all frames and reject any incomplete trailing frame.
-
 ///|
+/// Strictly decode all frames and reject any incomplete trailing frame.
 /// The default limit is Int's maximum. Returned views retain input backing Bytes.
 pub fn decode(
   input : BytesView,
