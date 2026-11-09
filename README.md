@@ -6,6 +6,7 @@
 
 - 单条、批量编码和向已有 Buffer 追加编码。
 - 严格解码，拒绝前导零、无效长度、缺逗号和截断输入。
+- `decode_prefix` / `try_decode_prefix` 读取首帧并返回消费量，保留未经解析的尾随数据。
 - 有界增量 Decoder：完整消息通过逗号校验后交付。
 - `Decoder::feed_some` 在消费者返回 false 时停于完整帧边界，可按需消费一条或一批消息。
 - StreamingDecoder：按输入片段交付，不缓存整条消息。
@@ -71,6 +72,8 @@ stream.finish()
 需要限制一次处理的事件数时，使用 `stream.feed_some(chunk, on_event)`，让回调返回 false 即可停止。解析状态已推进到该事件之后；用返回值截取 `chunk[consumed:]` 续喂。回调持续返回 true 时与 `feed` 等价。停止不会关闭流，也不会读取剩余字节；在 `Begin` 或 `Data` 后停止的帧仍未提交。
 
 只需完整消息的消费者可使用 `decoder.feed_some(chunk, on_frame)`。回调返回 false 时该帧已经验证并交付，返回的消费量包含终止逗号；后续帧尚未解析。继续喂入 `chunk[consumed:]` 即可恢复，调用 `finish()` 仍会正常检查 EOF。
+
+读取“netstring 头部 + 原始正文”一类数据时，可用 `let (header, consumed) = @netstring.decode_prefix(input)`，再通过 `input[consumed:]` 取得正文。尾部不作为 netstrings 校验。数据尚未收齐时，`try_decode_prefix` 对合法未完成前缀返回 None；非法格式或超长声明仍立即报错。两者均返回借用输入的视图，默认上限与 `decode` 一致。
 
 ## 行为边界
 

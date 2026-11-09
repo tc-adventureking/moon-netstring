@@ -9,11 +9,15 @@ import {
 // Values
 pub fn decode(BytesView, max_len? : Int32) -> Array[BytesView] raise NetstringError
 
+pub fn decode_prefix(BytesView, max_len? : Int32) -> (BytesView, Int32) raise NetstringError
+
 pub fn encode(BytesView) -> Bytes
 
 pub fn encode_all(Array[BytesView]) -> Bytes
 
 pub fn encode_to(@buffer.Buffer, BytesView) -> Unit
+
+pub fn try_decode_prefix(BytesView, max_len? : Int32) -> (BytesView, Int32)? raise NetstringError
 
 // Errors
 #derive(Eq, @debug.Debug)
