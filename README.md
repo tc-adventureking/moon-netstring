@@ -2,6 +2,8 @@
 
 纯 MoonBit netstrings 编解码库。将任意二进制消息编码成 `字节长度:内容,`，并从任意切块的字节流中恢复消息边界。适合进程通信、记录文件和已有 netstrings 协议的接入。零第三方依赖，提供完整消息与分段输出两种接收方式。
 
+[GitHub 源码](https://github.com/tc-adventureking/moon-netstring) · [Mooncakes 文档](https://mooncakes.io/docs/tc-adventureking/netstring/)
+
 ## 功能
 
 - 单条、批量编码和向已有 Buffer 追加编码。
@@ -17,25 +19,19 @@
 
 ## 安装与使用
 
-当前为本地源码交付，尚未发布 Mooncakes。将源码目录命名为 `netstring`，与消费项目 `app` 放在同一目录，运行：
+在 MoonBit 项目目录中安装：
 
 ```sh
-moon work init netstring app
+moon add tc-adventureking/netstring@0.1.0
 ```
 
-在 `app/moon.mod` 添加模块依赖：
-
-```toml
-import { "tc-adventureking/netstring@0.1.0", }
-```
-
-在 `app/moon.pkg` 引入：
+在 `moon.pkg` 引入：
 
 ```moonbit
 import { "tc-adventureking/netstring" @netstring, }
 ```
 
-需要 2026-11-04 或更新的 MoonBit 工具链。核心使用标准库，可编译到 wasm、wasm-gc、js 和 native。可运行示例位于 `examples/main`：
+需要 2026-11-04 或更新的 MoonBit 工具链。核心使用标准库，可编译到 wasm、wasm-gc、js 和 native。克隆源码仓库后，可运行其中的示例 `examples/main`：
 
 ```sh
 moon run examples/main
