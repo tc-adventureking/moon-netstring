@@ -29,6 +29,7 @@ pub fn NetstringError::to_repr(Self) -> @debug.Repr
 // Types and methods
 type Decoder
 pub fn Decoder::feed(Self, BytesView, (BytesView) -> Unit) -> Unit raise NetstringError
+pub fn Decoder::feed_some(Self, BytesView, (BytesView) -> Bool) -> Int32 raise NetstringError
 pub fn Decoder::finish(Self) -> Unit raise NetstringError
 pub fn Decoder::new(max_len? : Int32) -> Self raise NetstringError
 pub fn Decoder::offset(Self) -> Int64

@@ -32,13 +32,31 @@ pub fn Decoder::feed(
   chunk : BytesView,
   on_frame : (BytesView) -> Unit,
 ) -> Unit raise NetstringError {
-  self.parser.feed(chunk, fn(event) {
+  ignore(
+    self.feed_some(chunk, fn(frame) {
+      on_frame(frame)
+      true
+    }),
+  )
+}
+
+///|
+/// Stop at a complete frame boundary when on_frame returns false. Return the
+/// consumed prefix length of this chunk; its suffix is untouched and may be
+/// fed later. Buffer ownership and error semantics are the same as feed().
+pub fn Decoder::feed_some(
+  self : Decoder,
+  chunk : BytesView,
+  on_frame : (BytesView) -> Bool,
+) -> Int32 raise NetstringError {
+  self.parser.feed_some(chunk, fn(event) {
     match event {
       Begin(_) => {
         self.first = None
         self.buffer = None
+        true
       }
-      Data(part) =>
+      Data(part) => {
         match self.buffer {
           Some(buffer) => buffer.write_bytes(part)
           None =>
@@ -53,6 +71,8 @@ pub fn Decoder::feed(
               }
             }
         }
+        true
+      }
       End => {
         let payload = match self.buffer {
           Some(buffer) => buffer.to_bytes()[:]

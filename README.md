@@ -7,6 +7,7 @@
 - 单条、批量编码和向已有 Buffer 追加编码。
 - 严格解码，拒绝前导零、无效长度、缺逗号和截断输入。
 - 有界增量 Decoder：完整消息通过逗号校验后交付。
+- `Decoder::feed_some` 在消费者返回 false 时停于完整帧边界，可按需消费一条或一批消息。
 - StreamingDecoder：按输入片段交付，不缓存整条消息。
 - `StreamingDecoder::feed_some` 支持在事件后停止，返回当前块已消费的字节数，供调用方保留余下数据、稍后续喂。
 - 每个错误包含稳定类别和绝对字节偏移；失败锁定、EOF 检查及显式复位。
@@ -68,6 +69,8 @@ stream.finish()
 调用这些 API 的函数须声明 `raise` 或捕获 `NetstringError`。
 
 需要限制一次处理的事件数时，使用 `stream.feed_some(chunk, on_event)`，让回调返回 false 即可停止。解析状态已推进到该事件之后；用返回值截取 `chunk[consumed:]` 续喂。回调持续返回 true 时与 `feed` 等价。停止不会关闭流，也不会读取剩余字节；在 `Begin` 或 `Data` 后停止的帧仍未提交。
+
+只需完整消息的消费者可使用 `decoder.feed_some(chunk, on_frame)`。回调返回 false 时该帧已经验证并交付，返回的消费量包含终止逗号；后续帧尚未解析。继续喂入 `chunk[consumed:]` 即可恢复，调用 `finish()` 仍会正常检查 EOF。
 
 ## 行为边界
 
