@@ -41,6 +41,8 @@ import { "tc-adventureking/netstring" @netstring, }
 moon run examples/main
 ```
 
+`moon run examples/transactional` 展示流式接收的提交边界：只有 End 才累计已接收指标，格式错误时丢弃当前帧的临时状态，保留之前成功的消息。示例输出一条已提交消息、5 个已提交字节和 0 个待提交字节，并报告被丢弃的 3 字节及错误位置。
+
 ## 使用示例
 
 ```moonbit

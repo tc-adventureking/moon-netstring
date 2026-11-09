@@ -1,0 +1,5 @@
+import {
+  "tc-adventureking/netstring",
+}
+
+pkgtype(kind: "executable")
