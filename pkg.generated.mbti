@@ -63,6 +63,7 @@ pub fn Event::to_repr(Self) -> @debug.Repr
 
 type StreamingDecoder
 pub fn StreamingDecoder::feed(Self, BytesView, (Event) -> Unit) -> Unit raise NetstringError
+pub fn StreamingDecoder::feed_some(Self, BytesView, (Event) -> Bool) -> Int32 raise NetstringError
 pub fn StreamingDecoder::finish(Self) -> Unit raise NetstringError
 pub fn StreamingDecoder::new(max_len? : Int32) -> Self raise NetstringError
 pub fn StreamingDecoder::offset(Self) -> Int64

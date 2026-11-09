@@ -88,6 +88,24 @@ pub fn StreamingDecoder::feed(
   chunk : BytesView,
   on_event : (Event) -> Unit,
 ) -> Unit raise NetstringError {
+  ignore(
+    self.feed_some(chunk, fn(event) {
+      on_event(event)
+      true
+    }),
+  )
+}
+
+///|
+/// Consume at most this chunk, stopping immediately after a callback returns
+/// false. The return value counts consumed bytes in chunk; feed its remaining
+/// suffix later. State and absolute offset advance only for consumed bytes.
+/// Returning false does not close the stream or create a persistent pause.
+pub fn StreamingDecoder::feed_some(
+  self : StreamingDecoder,
+  chunk : BytesView,
+  on_event : (Event) -> Bool,
+) -> Int32 raise NetstringError {
   if self.busy {
     raise NetstringError(Reentrant, self.position)
   }
@@ -107,8 +125,8 @@ pub fn StreamingDecoder::feed(
 fn StreamingDecoder::feed_inner(
   self : StreamingDecoder,
   chunk : BytesView,
-  on_event : (Event) -> Unit,
-) -> Unit raise NetstringError {
+  on_event : (Event) -> Bool,
+) -> Int32 raise NetstringError {
   let mut i = 0
   while i < chunk.length() {
     match self.phase {
@@ -135,7 +153,9 @@ fn StreamingDecoder::feed_inner(
           self.phase = if self.remaining == 0 { Comma } else { Payload }
           i = i + 1
           self.position = self.position + 1L
-          on_event(Begin(self.length))
+          if !on_event(Begin(self.length)) {
+            break
+          }
         } else {
           self.fail(InvalidByte)
         }
@@ -154,7 +174,9 @@ fn StreamingDecoder::feed_inner(
         if self.remaining == 0 {
           self.phase = Comma
         }
-        on_event(Data(part))
+        if !on_event(Data(part)) {
+          break
+        }
       }
       Comma => {
         if chunk[i] != b',' {
@@ -165,11 +187,14 @@ fn StreamingDecoder::feed_inner(
         self.phase = Length
         self.length = 0
         self.digits = 0
-        on_event(End)
+        if !on_event(End) {
+          break
+        }
       }
       _ => abort("unreachable parser phase")
     }
   }
+  i
 }
 
 ///|
