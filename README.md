@@ -43,6 +43,8 @@ moon run examples/main
 
 `moon run examples/transactional` 展示流式接收的提交边界：只有 End 才累计已接收指标，格式错误时丢弃当前帧的临时状态，保留之前成功的消息。示例输出一条已提交消息、5 个已提交字节和 0 个待提交字节，并报告被丢弃的 3 字节及错误位置。
 
+`moon run examples/prefix_record` 展示“元数据 netstring + 原始正文”记录：前缀解码返回元数据和 21 字节的头部消费量，余下 8 字节正文含零字节、逗号与非 UTF-8 字节，仍被完整保留。示例只展示记录边界，不实现具体网络协议。
+
 ## 使用示例
 
 ```moonbit
