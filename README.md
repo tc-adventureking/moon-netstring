@@ -1,6 +1,6 @@
 # moon-netstring
 
-纯 MoonBit netstrings 编解码库，将任意二进制消息表示为“字节长度:内容,”。支持 wasm、wasm-gc、JavaScript 和 native；核心只依赖 MoonBit 标准库。
+纯 MoonBit netstrings 编解码库，将任意二进制消息表示为“字节长度:内容,”。以 pynetstring 0.5 为能力参考、Twisted 25.5.0 为严格格式对照，支持 wasm、wasm-gc、JavaScript 和 native；核心只依赖 MoonBit 标准库。
 
 ## 功能
 
@@ -35,9 +35,9 @@ fn main raise {
 
 增量接口默认每帧最多 99,999 字节。`max_len` 只限制单帧；流式片段在 `End` 后才算完整消息。长期保留大块中的小视图时，可按需 `to_owned()`。
 
-[完整 API](https://mooncakes.io/docs/tc-adventureking/netstring/) · [使用指南](https://github.com/tc-adventureking/moon-netstring/blob/main/docs/USAGE.md) · [源码](https://github.com/tc-adventureking/moon-netstring)
+[完整 API](pkg.generated.mbti) · [Python 对照与差异](docs/COMPATIBILITY.md) · [使用场景](docs/USAGE.md) · [Mooncakes](https://mooncakes.io/docs/tc-adventureking/netstring/)
 
-## 示例
+## 示例与测试
 
 安装 MoonBit 工具链后在仓库运行：
 
@@ -49,6 +49,8 @@ moon run examples/prefix_record
 
 三个示例分别展示基本编解码、流式提交与撤销，以及元数据帧后保留原始二进制正文。
 
-## 许可与参考
+2026-11-17 已使用 moon 0.1.20261104、moonc v0.10.20 完成四后端检查、契约测试和上述示例运行，并通过 Mooncakes 0.1.1 的独立安装及 README 消费验证。
+
+## 许可
 
 代码使用 [MIT](https://github.com/tc-adventureking/moon-netstring/blob/main/LICENSE)。格式依据 [D. J. Bernstein netstrings](https://cr.yp.to/proto/netstrings.txt)，行为参考 [pynetstring 0.5](https://github.com/rj79/pynetstring) 和 [Twisted 25.5.0](https://github.com/twisted/twisted/blob/twisted-25.5.0/src/twisted/protocols/basic.py)（均为 MIT）；实现为 MoonBit 原生代码，未复制参考项目源码。
