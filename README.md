@@ -1,20 +1,20 @@
 # moon-netstring
 
-纯 MoonBit netstrings 编解码库，将任意二进制消息表示为“字节长度:内容,”。以 pynetstring 0.5 为能力参考、Twisted 25.5.0 为严格格式对照，支持 wasm、wasm-gc、JavaScript 和 native；核心只依赖 MoonBit 标准库。
+纯 MoonBit netstrings 编解码库，可与 Python 的 pynetstring 0.5 和 Twisted 25.5.0 交换标准 netstrings。支持 wasm、wasm-gc、JavaScript 和 native，核心只依赖 MoonBit 标准库。
 
 ## 功能
 
-- **编码**：单条、批量及 Buffer 追加编码，精确计算线格式大小，生成分段发送所需的长度头。
-- **解码**：严格格式校验，支持完整输入、首帧前缀读取和未完成前缀探测。
+- **编码**：支持单条、批量及 Buffer 追加编码。`encoded_length` 精确计算帧长，`encode_header` 生成分段发送所需的长度头。
+- **解码**：一次读取全部消息，或用 `decode_prefix` 读取首帧并返回已消费字节数。`try_decode_prefix` 可识别尚未收齐的帧。
 - **增量 `Decoder`**：按完整帧交付，限制单帧长度，支持暂停、续喂、EOF 检查和复位。
 - **流式 `StreamingDecoder`**：以 `Begin/Data/End` 分段交付，无须缓存整帧；错误包含类别和绝对字节偏移。
 
-长度按字节计算，空载荷为 `0:,`；拒绝多余前导零、超长声明、缺失逗号及截断输入。
+长度按字节计算。例如 `3:a,b,` 的载荷为 `a,b`，空载荷编码为 `0:,`。解码时检查多余前导零、超长声明、缺失逗号及截断输入。
 
 ## 安装与使用
 
 ```bash
-moon add tc-adventureking/netstring@0.1.1
+moon add tc-adventureking/netstring@0.1.2
 ```
 
 在 `moon.pkg` 中导入：
@@ -47,10 +47,10 @@ moon run examples/transactional
 moon run examples/prefix_record
 ```
 
-三个示例分别展示基本编解码、流式提交与撤销，以及元数据帧后保留原始二进制正文。
+第一个示例分两次喂入 `5:hello,0:,`，依次收到 `hello` 和空消息。第二个示例提交第一帧的 5 字节，第二帧在偏移 13 处出错，只撤销该帧暂存的 3 字节。第三个示例读取占 21 字节的元数据帧，余下 8 字节作为原始正文保留。
 
-2026-11-17 已使用 moon 0.1.20261104、moonc v0.10.20 完成四后端检查、契约测试和上述示例运行，并通过 Mooncakes 0.1.1 的独立安装及 README 消费验证。
+本地使用 moon 0.1.20261104、moonc v0.10.20 在四个后端各运行 24 项契约测试和上述三个示例。与 pynetstring、Twisted 的对照覆盖 7,054 组基础输入流，另用独立解析器核对了短输入在不同拆分位置、长度上限和暂停方式下的帧序列与错误偏移。
 
 ## 许可
 
-代码使用 [MIT](https://github.com/tc-adventureking/moon-netstring/blob/main/LICENSE)。格式依据 [D. J. Bernstein netstrings](https://cr.yp.to/proto/netstrings.txt)，行为参考 [pynetstring 0.5](https://github.com/rj79/pynetstring) 和 [Twisted 25.5.0](https://github.com/twisted/twisted/blob/twisted-25.5.0/src/twisted/protocols/basic.py)（均为 MIT）；实现为 MoonBit 原生代码，未复制参考项目源码。
+项目代码使用 [MIT](LICENSE)。协议依据 [D. J. Bernstein 的 netstrings 规范](https://cr.yp.to/proto/netstrings.txt)，行为参考 [pynetstring 0.5](https://github.com/rj79/pynetstring) 和 [Twisted 25.5.0](https://github.com/twisted/twisted/blob/twisted-25.5.0/src/twisted/protocols/basic.py)。

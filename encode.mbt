@@ -1,7 +1,24 @@
 ///|
+fn write_digits(output : @buffer.Buffer, value : UInt32) -> Unit {
+  // A UInt32 has at most ten decimal digits.
+  if value >= 10U {
+    write_digits(output, value / 10U)
+  }
+  output.write_byte((48U + value % 10U).to_byte())
+}
+
+///|
 fn write_header(output : @buffer.Buffer, payload_length : UInt32) -> Unit {
-  output.write_string_utf8(payload_length.to_string()[:])
+  write_digits(output, payload_length)
   output.write_byte(b':')
+}
+
+///|
+fn wire_buffer(size : Int64) -> @buffer.Buffer {
+  if size > 2_147_483_647L {
+    abort("netstring output exceeds maximum Bytes length")
+  }
+  @buffer.Buffer(size_hint=size.to_int())
 }
 
 ///|
@@ -17,6 +34,8 @@ pub fn encode_header(payload_length : UInt32) -> Bytes {
 
 ///|
 /// Append one netstring. Length counts payload bytes, not text characters.
+/// The caller's buffer must have room within the Int32 indexing limit for
+/// the complete frame, including the length header and comma.
 pub fn encode_to(output : @buffer.Buffer, payload : BytesView) -> Unit {
   write_header(output, payload.length().reinterpret_as_uint())
   output.write_bytes(payload)
@@ -25,19 +44,23 @@ pub fn encode_to(output : @buffer.Buffer, payload : BytesView) -> Unit {
 
 ///|
 /// Encode one binary payload as decimal-length:payload,.
+/// Aborts if the complete frame cannot fit in an Int32-indexed Bytes.
 pub fn encode(payload : BytesView) -> Bytes {
   let size = encoded_length(payload.length().reinterpret_as_uint())
-  // A contiguous builder is Int-indexed even though size planning is Int64.
-  let hint = if size <= 2_147_483_647L { size.to_int() } else { 0 }
-  let output = @buffer.Buffer(size_hint=hint)
+  let output = wire_buffer(size)
   encode_to(output, payload)
   output.to_bytes()
 }
 
 ///|
 /// Concatenate the encodings of an ordered batch of payloads.
+/// Aborts before allocation if the combined wire size exceeds Int32's maximum.
 pub fn encode_all(payloads : Array[BytesView]) -> Bytes {
-  let output = @buffer.Buffer()
+  let mut size = 0L
+  for payload in payloads {
+    size += encoded_length(payload.length().reinterpret_as_uint())
+  }
+  let output = wire_buffer(size)
   for payload in payloads {
     encode_to(output, payload)
   }

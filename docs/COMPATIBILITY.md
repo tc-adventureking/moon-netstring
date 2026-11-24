@@ -17,6 +17,8 @@
 
 本库另外提供 Buffer 追加编码、线格式长度计算、独立长度头、首帧前缀读取、合法未完成前缀探测，以及 `feed_some` 暂停续喂、`finish`、`reset` 和回调重入保护。这些接口服务于流接入及资源控制，不改变 netstrings 线格式。
 
+MoonBit 中也有其他分帧协议。例如 moonwire 使用带标识、版本、类型、三字节大端长度和校验和的固定头。需要与 pynetstring、Twisted 或 SCGI 的请求头交换标准 netstrings 时，接收方按十进制 ASCII 长度、冒号和终止逗号识别边界。[moonwire 帧格式](https://github.com/Han-Wentao/moonwire) · [SCGI 请求格式](https://python.ca/scgi/protocol.txt)
+
 ## 可观察差异
 
 | 条件 | pynetstring 0.5 | 本库 |
@@ -31,6 +33,8 @@
 | EOF 与失败恢复 | `decode()` 检查截断；增量类无独立 `finish/reset` 接口 | `finish()` 检查 EOF；长度、格式或 EOF 截断错误锁定，`reset()` 才开始新流 |
 
 `encode_header` 与 `encoded_length` 可处理 UInt 范围的长度值；实际接收长度受 Int 上限和 `max_len` 限制。生成长度头不表示本库能够接收该范围内的任意大帧，双方须采用一致的接收限制。
+
+需要返回一个连续 `Bytes` 时，完整线格式（含每帧的长度头和逗号）最多可表示 2,147,483,647 字节，实际可分配大小还取决于运行环境。大批次可在发送前分批，或逐帧发送长度头、载荷和逗号。
 
 错误类别按触发条件对应：pynetstring 的 `TooLong` 对应本库 `TooLong`；`BadLength` 对应 `EmptyLength` 或 `InvalidByte`；`IncompleteString` 对应 `MissingComma` 或 `Truncated`。本库另有严格格式和生命周期错误 `LeadingZero`、`Closed`、`InvalidLimit`、`Reentrant`。这不是异常类型或错误优先级的一一兼容，例如 `decode(b"2147483648:")` 在本库先报 `TooLong`，在 pynetstring 0.5 中因没有收到完整载荷而报 `IncompleteString`。
 
