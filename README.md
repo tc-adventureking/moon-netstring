@@ -15,7 +15,7 @@
 ## 安装与使用
 
 ```bash
-moon add tc-adventureking/netstring@0.1.2
+moon add tc-adventureking/netstring@0.2.0
 ```
 
 在 `moon.pkg` 中导入：
@@ -40,21 +40,29 @@ fn main raise {
 
 ## 示例与测试
 
-安装 MoonBit 工具链后在仓库运行：
+在仓库根目录运行以下命令。CI 对 `js`、`wasm`、`wasm-gc`、`native` 分别执行检查、构建、测试和四个示例，本地可替换 `--target` 的值。
 
 ```bash
-moon run examples/main
-moon run examples/transactional
-moon run examples/prefix_record
-moon run examples/scgi_request
+moon check --target js --deny-warn
+moon build --target js --deny-warn
+moon test --target js --deny-warn
+moon run examples/main --target js
+moon run examples/transactional --target js
+moon run examples/prefix_record --target js
+moon run examples/scgi_request --target js
 ```
 
-第一个示例分两次喂入 `5:hello,0:,`，依次收到 `hello` 和空消息。第二个示例提交第一帧的 5 字节，第二帧在偏移 13 处出错，只撤销该帧暂存的 3 字节。第三个示例读取占 21 字节的元数据帧，余下 8 字节作为原始正文保留。
+| 示例 | 输入与处理 | 可核对的结果 |
+|---|---|---|
+| `main` 消息流 | 将 `5:hello,0:,` 分两次喂入，依次交付完整帧 | 收到 `b"hello"` 和 `b""` 两条消息 |
+| `transactional` 分块写入 | 先暂存流式片段，读到结束事件才提交。第二帧的终止字节有误 | 已提交 1 帧、5 字节，在偏移 13 撤销 3 字节，待提交量归零 |
+| `prefix_record` 混合格式记录 | 读取首帧元数据，再按消费长度切出原始正文 | `header_wire_bytes=21`，余下 8 字节含 NUL、逗号和 `0xff` |
+| `scgi_request` Web 网关 | 编码发往 `/upload` 的 POST 请求，逐字节送入 SCGI 解码器 | 打印 `content_length=8` 和 `request_complete`，断言还原的正文与输入逐字节相同 |
 
-本地使用 moon 0.1.20261104、moonc v0.10.20 在四个后端各运行 24 项契约测试和前三个示例。与 pynetstring、Twisted 的对照覆盖 7,054 组基础输入流，另用独立解析器核对了短输入在不同拆分位置、长度上限和暂停方式下的帧序列与错误偏移。
+根包测试覆盖整批编解码、跨块、暂停续喂、非法帧和 EOF。SCGI 子包另含规范样例、Nginx 报文和截断测试。[持续集成](https://github.com/tc-adventureking/moon-netstring/actions/workflows/ci.yml) · [SCGI 测试与用法](docs/SCGI.md)
 
-SCGI 示例逐字节喂入一个包含 NUL 和非 UTF-8 字节的 POST 请求，检查正文能否原样还原。可用 `moon test scgi` 运行仓库内的 SCGI 回归测试。
+在 Git 检出中运行 `python3 scripts/count_library.py v0.2.0` 可逐文件复核实现行数。仅计根包和 `scgi/` 的手写库实现 `.mbt`，排除测试、示例、生成接口、空行和纯行注释，合计 737 行。再排除不含字母、数字或下划线的行，合计 583 行。
 
 ## 许可
 
-项目代码使用 [MIT](LICENSE)。协议依据 [D. J. Bernstein 的 netstrings 规范](https://cr.yp.to/proto/netstrings.txt)，行为参考 [pynetstring 0.5](https://github.com/rj79/pynetstring) 和 [Twisted 25.5.0](https://github.com/twisted/twisted/blob/twisted-25.5.0/src/twisted/protocols/basic.py)。
+项目代码使用 [MIT](LICENSE)。pynetstring 0.5 和 Twisted 25.5.0 均为 MIT，用于字节行为对照。SCGI 测试采用公有领域规范中的请求样例。各项来源、许可证及参考范围见[参考与归属](docs/COMPATIBILITY.md#参考与归属)。

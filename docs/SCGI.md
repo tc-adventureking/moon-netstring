@@ -4,7 +4,7 @@
 
 ## 编码和解码完整请求
 
-在 `moon.pkg` 中导入 `"tc-adventureking/netstring/scgi" @scgi`。以下示例可在包含 `scgi` 子包的源码版本中运行。
+安装 `tc-adventureking/netstring@0.2.0` 后，在 `moon.pkg` 中导入 `"tc-adventureking/netstring/scgi" @scgi`。
 
 ```moonbit
 let headers : Array[@scgi.Header] = [
@@ -36,4 +36,4 @@ moon run examples/scgi_request
 
 回归测试逐字节比对 SCGI 规范的请求样例，遍历该请求的所有两块切分位置与提前 EOF 位置，并覆盖字段重复、非法长度、长度溢出和二进制正文。
 
-回归测试还包含一份 Nginx 1.28.3 通过 `scgi_pass` 转发的 POST 请求。在本地回环联调中，MoonBit 解码器读出了请求头和全部 8 字节正文，HTTP 客户端收到了 201 响应及原样返回的二进制正文。
+回归测试 `decodes a binary POST forwarded by nginx` 重放 Nginx 1.28.3 通过 `scgi_pass` 转发的请求。可以在无 Nginx 环境运行 `moon test scgi --target js --filter '*forwarded by nginx*'`，核对 POST 方法、URI、内容类型和全部 8 字节正文。采集该报文的回环联调中，HTTP 客户端收到 201 和原样返回的二进制正文。

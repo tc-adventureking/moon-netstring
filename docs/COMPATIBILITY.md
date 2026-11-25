@@ -2,6 +2,17 @@
 
 本库依据 [D. J. Bernstein netstrings 格式](https://cr.yp.to/proto/netstrings.txt)，以 [pynetstring 0.5](https://pypi.org/project/pynetstring/0.5/) 为编解码能力参考，并用 [Twisted 25.5.0 NetstringReceiver](https://github.com/twisted/twisted/blob/twisted-25.5.0/src/twisted/protocols/basic.py) 交叉核对严格格式。实现为 MoonBit 原生代码；这里比较字节协议和处理能力，不包含 Python 运行时或 Twisted 传输层。
 
+## 参考与归属
+
+| 来源 | 许可证或文档声明 | 在本库的使用范围 |
+|---|---|---|
+| D. J. Bernstein，Netstrings | [1997 年规范原文](https://cr.yp.to/proto/netstrings.txt)未标注软件许可证 | 依据十进制字节长度、冒号、载荷和终止逗号的线格式实现 MoonBit 编解码器。未引入文中的 C 示例。 |
+| [pynetstring 0.5](https://github.com/rj79/pynetstring/tree/0.5) | [MIT](https://github.com/rj79/pynetstring/blob/0.5/LICENSE.txt) | 对照单条与批量编码、增量解码和分段交付。用 Python 实现核对行为，发布包中无 Python 源码或运行时依赖。 |
+| [Twisted 25.5.0，NetstringReceiver](https://github.com/twisted/twisted/blob/twisted-25.5.0/src/twisted/protocols/basic.py) | [MIT](https://github.com/twisted/twisted/blob/twisted-25.5.0/LICENSE) | 核对标准帧、非法前导零、长度限制和结束逗号等处理行为。网络传输层由调用方提供。 |
+| Neil Schemenauer，SCGI 协议 | [规范第 6 节声明全文为公有领域](https://python.ca/scgi/protocol.txt) | 按第 3 节实现头字段和正文长度校验，第 5 节的请求字节用作编解码测试向量。 |
+
+SCGI 互操作测试另使用 Nginx 转发产生的请求字节，测试文件注明了采集版本。下面提及的 moonwire 只用于说明两种线格式的区别。以上外部实现均不作为本库的运行依赖。[Nginx SCGI 模块文档](https://nginx.org/en/docs/http/ngx_http_scgi_module.html) · [本项目 MIT 许可证](../LICENSE)
+
 ## 能力对照
 
 | pynetstring 0.5 | MoonBit 接口 | 对照结果 |
