@@ -29,7 +29,7 @@ pub extend Header with @debug.Debug::{to_repr}
 #derive(@debug.Debug)
 struct RequestHead {
   content_length : Int64
-  fields : Map[BytesView, BytesView]
+  fields : Map[Bytes, BytesView]
 }
 
 ///|
@@ -79,7 +79,7 @@ pub fn RequestHead::content_length(self : RequestHead) -> Int64 {
 ///|
 /// Look up a byte-exact header name, including the two required SCGI fields.
 pub fn RequestHead::get(self : RequestHead, name : BytesView) -> BytesView? {
-  self.fields.get(name)
+  self.fields.get(name.to_owned())
 }
 
 ///|
@@ -87,7 +87,7 @@ pub fn RequestHead::get(self : RequestHead, name : BytesView) -> BytesView? {
 pub fn RequestHead::headers(self : RequestHead) -> Array[Header] {
   let fields = []
   for name, value in self.fields {
-    fields.push({ name, value, })
+    fields.push({ name: name[:], value, })
   }
   fields
 }
@@ -149,7 +149,7 @@ fn parse_head(
   }
   // Keep one owned header instead of retaining the transport chunk behind it.
   let header = payload.to_owned()[:]
-  let fields : Map[BytesView, BytesView] = Map([])
+  let fields : Map[Bytes, BytesView] = Map([])
   let mut cursor = 0
   let mut content_length = 0L
   while cursor < header.length() {
@@ -167,13 +167,15 @@ fn parse_head(
       }
       content_length = read_content_length(value, max_body_len)
     }
-    if fields.contains(name) {
-      raise DuplicateHeader(name.to_owned())
+    // An SCGI name may start at any byte offset. Hash an owned byte key.
+    let key = name.to_owned()
+    if fields.contains(key) {
+      raise DuplicateHeader(key)
     }
-    fields[name] = value
+    fields[key] = value
     cursor = value_end + 1
   }
-  if fields.get(scgi_name[:]) != Some(b"1"[:]) {
+  if fields.get(scgi_name) != Some(b"1"[:]) {
     raise InvalidVersion
   }
   { content_length, fields, }

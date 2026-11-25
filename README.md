@@ -61,7 +61,7 @@ moon run examples/scgi_request --target js
 
 根包测试覆盖整批编解码、跨块、暂停续喂、非法帧和 EOF。SCGI 子包另含规范样例、Nginx 报文和截断测试。[持续集成](https://github.com/tc-adventureking/moon-netstring/actions/workflows/ci.yml) · [SCGI 测试与用法](docs/SCGI.md)
 
-在 Git 检出中运行 `python3 scripts/count_library.py v0.2.0` 可逐文件复核实现行数。仅计根包和 `scgi/` 的手写库实现 `.mbt`，排除测试、示例、生成接口、空行和纯行注释，合计 737 行。再排除不含字母、数字或下划线的行，合计 583 行。
+在 Git 检出中运行 `python3 scripts/count_library.py v0.2.0` 可逐文件复核实现行数。仅计根包和 `scgi/` 的手写库实现 `.mbt`，排除测试、示例、生成接口、空行和纯行注释，合计 739 行。再排除不含字母、数字或下划线的行，合计 585 行。
 
 ## 许可
 

@@ -54,9 +54,9 @@ pub fn encode_head(
   if size > limit {
     raise HeaderTooLarge(max_header_len)
   }
-  let seen : Map[BytesView, Unit] = Map([])
-  seen[length_field.name] = ()
-  seen[version_field.name] = ()
+  let seen : Map[Bytes, Unit] = Map([])
+  seen[content_length_name] = ()
+  seen[scgi_name] = ()
   for index, field in headers {
     size += field.wire_size()
     if size > limit {
@@ -65,10 +65,11 @@ pub fn encode_head(
     if field.name.length() == 0 || has_nul(field.name) || has_nul(field.value) {
       raise InvalidField(index)
     }
-    if seen.contains(field.name) {
-      raise DuplicateHeader(field.name.to_owned())
+    let key = field.name.to_owned()
+    if seen.contains(key) {
+      raise DuplicateHeader(key)
     }
-    seen[field.name] = ()
+    seen[key] = ()
   }
   let payload_length = size.to_int().reinterpret_as_uint()
   let output = request_buffer(@netstring.encoded_length(payload_length))

@@ -58,6 +58,19 @@ test "field names, values, and body round-trip raw bytes" {
 }
 
 ///|
+test "encode and look up field names sliced at different byte offsets" {
+  for offset in 1..<5 {
+    let storage = b"xxxxREQUEST_METHOD"
+    let key = storage[offset:offset + 8]
+    let fields : Array[@scgi.Header] = [{ name: key, value: b"ok"[:] }]
+    let wire = @scgi.encode_request(fields[:], b""[:])
+    let request = @scgi.decode_request(wire[:])
+    assert_eq(request.head.get(key), Some(b"ok"[:]))
+    assert_eq(request.head.headers()[2].name, key)
+  }
+}
+
+///|
 test "decodes a binary POST forwarded by nginx" {
   // Captured from nginx 1.28.3 with scgi_pass on a loopback connection.
   let chunks : Array[Bytes] = [
