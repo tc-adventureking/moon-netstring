@@ -26,7 +26,7 @@ fn request_buffer(size : Int64) -> @buffer.Buffer raise RequestError {
   if size > 2_147_483_647L {
     raise RequestTooLarge
   }
-  @buffer.Buffer(capacity=size.to_int())
+  @buffer.Buffer(size_hint=size.to_int())
 }
 
 ///|

@@ -42,7 +42,7 @@ test "strict syntax and exact errors" {
 ///|
 test "all cuts deliver the same frames" {
   let wire = b"0:,5:he\x00lo,3::,,," // payload ':,,' plus terminator
-  let expected = @netstring.decode(wire)
+  let expected : Array[Bytes] = [b"", b"he\x00lo", b":,,"]
   for split = 0; split <= wire.length(); split = split + 1 {
     let decoder = @netstring.Decoder::new()
     let frames = []
@@ -50,8 +50,31 @@ test "all cuts deliver the same frames" {
     decoder.feed(b"", fn(frame) { frames.push(frame.to_owned()) })
     decoder.feed(wire[split:], fn(frame) { frames.push(frame.to_owned()) })
     decoder.finish()
-    assert_eq(frames, expected.map(fn(frame) { frame.to_owned() }))
+    assert_eq(frames, expected)
     assert_false(decoder.pending())
+  }
+}
+
+///|
+test "whole-batch codec preserves frame boundaries in both directions" {
+  let frames = [b""[:], b":\xff,\x00"[:], b"0123456789"[:], b""[:]]
+  let wire = b"0:,4::\xff,\x00,10:0123456789,0:,"
+  assert_eq(@netstring.encode_all(frames), wire)
+  assert_eq(@netstring.decode(wire, max_len=10), frames)
+}
+
+///|
+test "whole-batch decode rejects a bad or truncated suffix after a valid frame" {
+  let cases : Array[(Bytes, @netstring.ErrorKind, Int64)] = [
+    (b"1:a,00:,", LeadingZero, 5L),
+    (b"1:a,2:xy!", MissingComma, 8L),
+    (b"1:a,2", Truncated, 5L),
+    (b"1:a,2:x", Truncated, 7L),
+    (b"1:a,2:xy", Truncated, 8L),
+    (b"1:a,3:abc,", TooLong, 4L),
+  ]
+  for (wire, kind, offset) in cases {
+    assert_eq(error_for(wire[:], 2), Some(@netstring.NetstringError(kind, offset)))
   }
 }
 

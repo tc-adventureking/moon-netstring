@@ -33,6 +33,9 @@ struct RequestHead {
 }
 
 ///|
+pub extend RequestHead with @debug.Debug::{to_repr}
+
+///|
 /// An entire request. The body borrows the input passed to decode_request.
 pub struct Request {
   head : RequestHead

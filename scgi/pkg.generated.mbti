@@ -68,6 +68,7 @@ type RequestHead
 pub fn RequestHead::content_length(Self) -> Int64
 pub fn RequestHead::get(Self, BytesView) -> BytesView?
 pub fn RequestHead::headers(Self) -> Array[Header]
+pub fn RequestHead::to_repr(Self) -> @debug.Repr
 
 // Type aliases
 
