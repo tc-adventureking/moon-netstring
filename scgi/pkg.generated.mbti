@@ -1,0 +1,74 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "tc-adventureking/netstring/scgi"
+
+import {
+  "moonbitlang/core/debug",
+  "tc-adventureking/netstring",
+}
+
+// Values
+pub fn decode_request(BytesView, max_header_len? : Int32, max_body_len? : Int64) -> Request raise RequestError
+
+pub fn encode_head(ArrayView[Header], Int64, max_header_len? : Int32) -> Bytes raise RequestError
+
+pub fn encode_request(ArrayView[Header], BytesView, max_header_len? : Int32) -> Bytes raise RequestError
+
+// Errors
+#derive(Eq, @debug.Debug)
+pub(all) suberror RequestError {
+  FramingError(@netstring.NetstringError)
+  InvalidLimit
+  MalformedHeader(Int32)
+  ContentLengthMustBeFirst
+  InvalidContentLength
+  InvalidVersion
+  DuplicateHeader(Bytes)
+  BodyTooLarge(Int64)
+  HeaderTooLarge(Int32)
+  InvalidField(Int32)
+  RequestTooLarge
+  TruncatedHead(Int64)
+  TruncatedBody(Int64)
+  TrailingData(Int32)
+  Reentrant
+}
+pub fn RequestError::equal(Self, Self) -> Bool
+pub fn RequestError::not_equal(Self, Self) -> Bool
+pub fn RequestError::to_repr(Self) -> @debug.Repr
+
+// Types and methods
+#derive(Eq, @debug.Debug)
+pub(all) struct Header {
+  name : BytesView
+  value : BytesView
+}
+pub fn Header::equal(Self, Self) -> Bool
+pub fn Header::not_equal(Self, Self) -> Bool
+pub fn Header::to_repr(Self) -> @debug.Repr
+
+pub struct Request {
+  head : RequestHead
+  body : BytesView
+}
+
+type RequestDecoder
+pub fn RequestDecoder::feed(Self, BytesView, (RequestEvent) -> Unit) -> Int32 raise RequestError
+pub fn RequestDecoder::finish(Self) -> Unit raise RequestError
+pub fn RequestDecoder::is_complete(Self) -> Bool
+pub fn RequestDecoder::new(max_header_len? : Int32, max_body_len? : Int64) -> Self raise RequestError
+
+pub(all) enum RequestEvent {
+  Head(RequestHead)
+  Body(BytesView)
+  End
+}
+
+#derive(@debug.Debug)
+type RequestHead
+pub fn RequestHead::content_length(Self) -> Int64
+pub fn RequestHead::get(Self, BytesView) -> BytesView?
+pub fn RequestHead::headers(Self) -> Array[Header]
+
+// Type aliases
+
+// Traits

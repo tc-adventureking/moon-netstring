@@ -1,0 +1,6 @@
+import {
+  "tc-adventureking/netstring/scgi",
+  "moonbitlang/core/buffer",
+}
+
+pkgtype(kind: "executable")

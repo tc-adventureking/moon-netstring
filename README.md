@@ -8,6 +8,7 @@
 - **解码**：一次读取全部消息，或用 `decode_prefix` 读取首帧并返回已消费字节数。`try_decode_prefix` 可识别尚未收齐的帧。
 - **增量 `Decoder`**：按完整帧交付，限制单帧长度，支持暂停、续喂、EOF 检查和复位。
 - **流式 `StreamingDecoder`**：以 `Begin/Data/End` 分段交付，无须缓存整帧；错误包含类别和绝对字节偏移。
+- **SCGI 请求编解码**：`scgi` 子包复用 netstring 分帧，校验 SCGI 字段，并按 `CONTENT_LENGTH` 交付二进制正文。[SCGI 使用指南](docs/SCGI.md)
 
 长度按字节计算。例如 `3:a,b,` 的载荷为 `a,b`，空载荷编码为 `0:,`。解码时检查多余前导零、超长声明、缺失逗号及截断输入。
 
@@ -45,11 +46,14 @@ fn main raise {
 moon run examples/main
 moon run examples/transactional
 moon run examples/prefix_record
+moon run examples/scgi_request
 ```
 
 第一个示例分两次喂入 `5:hello,0:,`，依次收到 `hello` 和空消息。第二个示例提交第一帧的 5 字节，第二帧在偏移 13 处出错，只撤销该帧暂存的 3 字节。第三个示例读取占 21 字节的元数据帧，余下 8 字节作为原始正文保留。
 
-本地使用 moon 0.1.20261104、moonc v0.10.20 在四个后端各运行 24 项契约测试和上述三个示例。与 pynetstring、Twisted 的对照覆盖 7,054 组基础输入流，另用独立解析器核对了短输入在不同拆分位置、长度上限和暂停方式下的帧序列与错误偏移。
+本地使用 moon 0.1.20261104、moonc v0.10.20 在四个后端各运行 24 项契约测试和前三个示例。与 pynetstring、Twisted 的对照覆盖 7,054 组基础输入流，另用独立解析器核对了短输入在不同拆分位置、长度上限和暂停方式下的帧序列与错误偏移。
+
+SCGI 示例逐字节喂入一个包含 NUL 和非 UTF-8 字节的 POST 请求，检查正文能否原样还原。可用 `moon test scgi` 运行仓库内的 SCGI 回归测试。
 
 ## 许可
 

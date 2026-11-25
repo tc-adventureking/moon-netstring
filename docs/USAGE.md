@@ -41,7 +41,7 @@ stream.finish()
 
 读取“netstring 头部 + 原始正文”一类数据时，可用 `let (header, consumed) = @netstring.decode_prefix(input)`，再通过 `input[consumed:]` 取得正文。尾部不作为 netstrings 校验。数据尚未收齐时，`try_decode_prefix` 对合法未完成前缀返回 None；非法格式或超长声明仍立即报错。两者均返回借用输入的视图，默认上限与 `decode` 一致。
 
-SCGI 请求将以 NUL 分隔的字段编码为一个 netstring，正文紧跟其后。下面的头部有 24 个载荷字节，整个头帧占 28 字节。应用解析字段并校验 `CONTENT_LENGTH`，分帧库只负责找出头帧边界。[SCGI 请求格式](https://python.ca/scgi/protocol.txt)
+SCGI 请求将以 NUL 分隔的字段编码为一个 netstring，正文紧跟其后。下面的头部有 24 个载荷字节，整个头帧占 28 字节。`decode_prefix` 可以找出头帧边界。SCGI 子包支持进一步校验字段和处理完整请求。[SCGI 使用指南](SCGI.md) · [SCGI 请求格式](https://python.ca/scgi/protocol.txt)
 
 ```moonbit
 let request = b"24:CONTENT_LENGTH\x008\x00SCGI\x001\x00,\x00raw:,\xff!"
