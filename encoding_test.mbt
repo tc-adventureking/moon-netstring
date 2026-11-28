@@ -1,4 +1,16 @@
 ///|
+test "encoding a subview excludes both surrounding bytes" {
+  let input = b"L\x00:,\xffR"
+  let payload = input[1:5]
+  let wire = b"4:\x00:,\xff,"
+  assert_eq(@netstring.encode(payload), wire)
+  let output = @buffer.Buffer()
+  output.write_byte(b'!')
+  @netstring.encode_to(output, payload)
+  assert_eq(output.to_bytes(), b"!4:\x00:,\xff,")
+}
+
+///|
 test "wire sizes are exact across decimal boundaries without Int overflow" {
   let cases : Array[(UInt, Int64)] = [
     (0U, 3L), (9U, 12L), (10U, 14L), (99U, 103L),
