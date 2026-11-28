@@ -21,7 +21,7 @@
 ```bash
 moon new --user example netstring-demo
 cd netstring-demo
-moon add tc-adventureking/netstring@0.2.1
+moon add tc-adventureking/netstring@0.2.2
 ```
 
 将 `cmd/main/moon.pkg` 的内容替换为以下配置。
@@ -76,8 +76,6 @@ moon run examples/scgi_request --target js
 | `scgi_request` Web 网关 | 编码发往 `/upload` 的 POST 请求，逐字节送入 SCGI 解码器 | 打印 `content_length=8` 和 `request_complete`，断言还原的正文与输入逐字节相同 |
 
 根包测试覆盖整批编解码、跨块、暂停续喂、非法帧和 EOF。SCGI 子包另含规范样例、Nginx 报文和截断测试。[持续集成](https://github.com/tc-adventureking/moon-netstring/actions/workflows/ci.yml) · [SCGI 测试与用法](docs/SCGI.md)
-
-在 Git 检出中运行 `python3 scripts/count_library.py v0.2.0` 可逐文件复核实现行数。仅计根包和 `scgi/` 的手写库实现 `.mbt`，排除测试、示例、生成接口、空行和纯行注释，合计 739 行。再排除不含字母、数字或下划线的行，合计 585 行。
 
 ## 许可
 

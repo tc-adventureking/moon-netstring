@@ -4,7 +4,7 @@
 
 ## 编码和解码完整请求
 
-安装 `tc-adventureking/netstring@0.2.1` 后，在 `moon.pkg` 中导入 `"tc-adventureking/netstring/scgi" @scgi`。
+安装 `tc-adventureking/netstring@0.2.2` 后，在 `moon.pkg` 中导入 `"tc-adventureking/netstring/scgi" @scgi`。
 
 ```moonbit
 let headers : Array[@scgi.Header] = [
