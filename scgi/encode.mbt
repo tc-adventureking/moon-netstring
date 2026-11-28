@@ -15,9 +15,9 @@ fn Header::wire_size(self : Header) -> Int64 {
 
 ///|
 fn Header::write_to(self : Header, output : @buffer.Buffer) -> Unit {
-  output.write_bytes(self.name)
+  output.write_bytesview(self.name)
   output.write_byte(b'\x00')
-  output.write_bytes(self.value)
+  output.write_bytesview(self.value)
   output.write_byte(b'\x00')
 }
 
@@ -26,7 +26,7 @@ fn request_buffer(size : Int64) -> @buffer.Buffer raise RequestError {
   if size > 2_147_483_647L {
     raise RequestTooLarge
   }
-  @buffer.Buffer(size_hint=size.to_int())
+  @buffer.Buffer(capacity=size.to_int())
 }
 
 ///|
@@ -73,7 +73,7 @@ pub fn encode_head(
   }
   let payload_length = size.to_int().reinterpret_as_uint()
   let output = request_buffer(@netstring.encoded_length(payload_length))
-  output.write_bytes(@netstring.encode_header(payload_length))
+  output.write_bytesview(@netstring.encode_header(payload_length))
   length_field.write_to(output)
   version_field.write_to(output)
   for field in headers {
@@ -93,7 +93,7 @@ pub fn encode_request(
   let body_length = body.length().to_int64()
   let head = encode_head(headers, body_length, max_header_len~)
   let output = request_buffer(head.length().to_int64() + body_length)
-  output.write_bytes(head)
-  output.write_bytes(body)
+  output.write_bytesview(head)
+  output.write_bytesview(body)
   output.to_bytes()
 }

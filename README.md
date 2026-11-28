@@ -14,15 +14,24 @@
 
 ## 安装与使用
 
+需要 `moonc 1.0.0-rc1` 或更高版本。CI 固定使用 `1.0.0-rc1+3c0520448` 的编译器和标准库。安装后运行 `moon version --all`，在 `moonc` 一行核对版本。[MoonBit 安装指南](https://www.moonbitlang.com/download/)
+
+首次试用可以创建一个示例项目，并在项目根目录添加依赖。
+
 ```bash
-moon add tc-adventureking/netstring@0.2.0
+moon new --user example netstring-demo
+cd netstring-demo
+moon add tc-adventureking/netstring@0.2.1
 ```
 
-在 `moon.pkg` 中导入：
+将 `cmd/main/moon.pkg` 的内容替换为以下配置。
 
 ```moonbit
 import { "tc-adventureking/netstring" @netstring, }
+pkgtype(kind: "executable")
 ```
+
+将 `cmd/main/main.mbt` 的内容替换为以下程序。第一次喂入 `5:he`，第二次补齐 `hello` 并带上一个空帧。
 
 ```moonbit
 fn main raise {
@@ -32,6 +41,13 @@ fn main raise {
   decoder.feed(wire[4:], fn(frame) { println(frame.to_owned()) })
   decoder.finish()
 }
+```
+
+在示例项目根目录运行 `moon run cmd/main`，预期输出如下。
+
+```text
+b"hello"
+b""
 ```
 
 增量接口默认每帧最多 99,999 字节。`max_len` 只限制单帧；流式片段在 `End` 后才算完整消息。长期保留大块中的小视图时，可按需 `to_owned()`。

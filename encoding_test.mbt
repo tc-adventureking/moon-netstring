@@ -20,8 +20,8 @@ test "scatter send header matches contiguous encoding for arbitrary binary" {
   for n in [0, 1, 9, 10, 99, 100, 255, 999, 1000, 9999, 10000] {
     let payload = Bytes::from_array(Array::makei(n, fn(i) { ((i * 71) % 256).to_byte() })[:])
     let output = @buffer.Buffer()
-    output.write_bytes(@netstring.encode_header(n.reinterpret_as_uint()))
-    output.write_bytes(payload)
+    output.write_bytesview(@netstring.encode_header(n.reinterpret_as_uint()))
+    output.write_bytesview(payload)
     output.write_byte(b',')
     assert_eq(output.to_bytes(), @netstring.encode(payload))
   }

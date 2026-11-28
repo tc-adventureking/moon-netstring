@@ -15,7 +15,7 @@ fn main raise {
         println("request_uri=\{uri.to_owned()}")
         println("content_length=\{head.content_length()}")
       }
-      Body(part) => body.write_bytes(part)
+      Body(part) => body.write_bytesview(part)
       End => println("request_complete")
     }
   }

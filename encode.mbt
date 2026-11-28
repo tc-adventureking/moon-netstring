@@ -18,7 +18,7 @@ fn wire_buffer(size : Int64) -> @buffer.Buffer {
   if size > 2_147_483_647L {
     abort("netstring output exceeds maximum Bytes length")
   }
-  @buffer.Buffer(size_hint=size.to_int())
+  @buffer.Buffer(capacity=size.to_int())
 }
 
 ///|
@@ -27,7 +27,7 @@ fn wire_buffer(size : Int64) -> @buffer.Buffer {
 /// This UInt-sized sender may declare more than the local Int-sized decoder
 /// accepts; respect the receiver's configured limit when interoperating.
 pub fn encode_header(payload_length : UInt32) -> Bytes {
-  let output = @buffer.Buffer(size_hint=11)
+  let output = @buffer.Buffer(capacity=11)
   write_header(output, payload_length)
   output.to_bytes()
 }
@@ -38,7 +38,7 @@ pub fn encode_header(payload_length : UInt32) -> Bytes {
 /// the complete frame, including the length header and comma.
 pub fn encode_to(output : @buffer.Buffer, payload : BytesView) -> Unit {
   write_header(output, payload.length().reinterpret_as_uint())
-  output.write_bytes(payload)
+  output.write_bytesview(payload)
   output.write_byte(b',')
 }
 

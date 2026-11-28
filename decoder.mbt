@@ -58,14 +58,14 @@ pub fn Decoder::feed_some(
       }
       Data(part) => {
         match self.buffer {
-          Some(buffer) => buffer.write_bytes(part)
+          Some(buffer) => buffer.write_bytesview(part)
           None =>
             match self.first {
               None => self.first = Some(part)
               Some(first) => {
                 let buffer = @buffer.Buffer()
-                buffer.write_bytes(first)
-                buffer.write_bytes(part)
+                buffer.write_bytesview(first)
+                buffer.write_bytesview(part)
                 self.first = None
                 self.buffer = Some(buffer)
               }

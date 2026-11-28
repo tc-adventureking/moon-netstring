@@ -6,7 +6,7 @@ fn main raise {
   let body = b"\x00raw:,\xff!"
   let record = @buffer.Buffer()
   @netstring.encode_to(record, metadata)
-  record.write_bytes(body)
+  record.write_bytesview(body)
   let input = record.to_bytes()
   let (header, consumed) = @netstring.decode_prefix(input, max_len=1024)
   println("metadata=\{header.to_owned()}")

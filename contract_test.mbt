@@ -1,7 +1,7 @@
 ///|
 test "binary, batch and byte lengths" {
   let output = @buffer.Buffer()
-  output.write_bytes(b"prefix:")
+  output.write_bytesview(b"prefix:")
   @netstring.encode_to(output, b"hi")
   assert_eq(output.to_bytes(), b"prefix:2:hi,")
   assert_eq(@netstring.encode(b"A\x00:,"), b"4:A\x00:,,")

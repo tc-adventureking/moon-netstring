@@ -84,7 +84,7 @@ test "decodes a binary POST forwarded by nginx" {
   let on_event = fn(event : @scgi.RequestEvent) {
     match event {
       Head(head) => request_head = Some(head)
-      Body(part) => body.write_bytes(part)
+      Body(part) => body.write_bytesview(part)
       End => ()
     }
   }
@@ -114,7 +114,7 @@ test "decoder consumes one request across every two-chunk split" {
           head_count += 1
           content_length = head.content_length()
         }
-        Body(part) => body.write_bytes(part)
+        Body(part) => body.write_bytesview(part)
         End => completed += 1
       }
     }
@@ -162,7 +162,7 @@ test "final body chunk is capped at CONTENT_LENGTH" {
   let on_event = fn(event : @scgi.RequestEvent) {
     match event {
       Head(_) => ()
-      Body(part) => body.write_bytes(part)
+      Body(part) => body.write_bytesview(part)
       End => ended = true
     }
   }

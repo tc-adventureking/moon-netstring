@@ -4,6 +4,8 @@ on:
   pull_request:
 permissions:
   contents: read
+env:
+  MOONBIT_VERSION: '1.0.0-rc1+3c0520448'
 jobs:
   verify:
     runs-on: ubuntu-latest
@@ -18,9 +20,12 @@ jobs:
           node-version: '26.13.1'
       - uses: hustcer/setup-moonbit@1522f9aef02a8ca0187dfc00a41f5dd6b16750f7 # v1.23
         with:
-          version: '0.10.20+65efd5b93'
-          core-version: '0.10.20+65efd5b93'
-      - run: moon version --all
+          version: ${{ env.MOONBIT_VERSION }}
+          core-version: ${{ env.MOONBIT_VERSION }}
+      - name: Verify compiler version
+        run: |
+          moon version --all | tee "$RUNNER_TEMP/moon-version.txt"
+          grep -F "moonc v$MOONBIT_VERSION (" "$RUNNER_TEMP/moon-version.txt"
       - run: moon check --target ${{ matrix.target }} --deny-warn
       - run: moon build --target ${{ matrix.target }} --deny-warn
       - run: moon test --target ${{ matrix.target }} --deny-warn
